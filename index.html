@@ -106,21 +106,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // 2. A te saját konfigurációd (hagyd meg a saját adataidat!)
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        // 2. A te saját konfigurációd
         const firebaseConfig = {
             apiKey: "AIzaSyCoZrqFt-6L_WEXZSJATHcPCv3kghvSjZM",
             authDomain: "receptek-3e57b.firebaseapp.com",
             projectId: "receptek-3e57b",
             storageBucket: "receptek-3e57b.firebasestorage.app",
             messagingSenderId: "68235647947",
-            appId: "1:68235647947:web:de45f2386ad59ccfd5744e",
-            measurementId: "G-1CBDEF2PDQ"
+            appId: "1:68235647947:web:869766986c4728f3348633"
         };
 
-        // 3. Inicializálás
+        // 3. INICIALIZÁLÁS (Ez a rész hiányzott vagy hibás volt!)
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); // Ez a változó KELL a script.js-nek
+
+        // Ez a sor hozza létre a kapcsolatot, amit a script.js használ:
+        var db = firebase.firestore(); 
     </script>
 
     <script src="script.js"></script>
