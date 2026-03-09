@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szakácssegéd - Smart Kitchen App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🍳 Szakácssegéd</h1>
+            <p>Okos receptkezelő és bevásárlólista</p>
+            <nav class="tabs">
+                <button class="tab-link active" onclick="openTab(event, 'kamra-tab')">🏠 Kamra</button>
+                <button class="tab-link" onclick="openTab(event, 'recept-tab')">📖 Receptek</button>
+                <button class="tab-link" onclick="openTab(event, 'lista-tab')">🛒 Bevásárlólista</button>
+            </nav>
+        </header>
+
+        <main>
+            <section id="kamra-tab" class="tab-content active">
+                <div class="card">
+                    <h3>Készlet frissítése</h3>
+                    <div class="input-row">
+                        <input type="text" id="k-nev" placeholder="Alapanyag neve">
+                        <input type="number" id="k-menny" placeholder="Menny.">
+                        <select id="k-egyseg">
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="dl">dl</option>
+                            <option value="l">l</option>
+                            <option value="db">db</option>
+                        </select>
+                        <button onclick="hozzaadKamra()">Hozzáad</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Saját Készletem</h3>
+                    <ul id="kamraLista" class="item-list">
+                    </ul>
+                </div>
+            </section>
+
+            <section id="recept-tab" class="tab-content">
+                <div class="card">
+                    <h3>Új Recept Létrehozása</h3>
+                    <input type="text" id="receptNev" placeholder="Recept neve (pl. Palacsinta)"
+                        class="full-width-input">
+
+                    <div class="input-row" style="margin-top: 15px;">
+                        <input type="text" id="r-h-nev" placeholder="Hozzávaló">
+                        <input type="number" id="r-h-menny" placeholder="Menny.">
+                        <select id="r-h-egyseg">
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="dl">dl</option>
+                            <option value="l">l</option>
+                            <option value="db">db</option>
+                        </select>
+                        <button onclick="hozzaadIdeiglenesHozzavalo()">+</button>
+                    </div>
+
+                    <ul id="ideiglenesLista" class="item-list preview-list">
+                    </ul>
+
+                    <button class="btn-alt" onclick="mentesRecept()">Recept Végleges Mentése</button>
+                </div>
+
+                <div class="card">
+                    <h3>Mentett Ételek</h3>
+                    <ul id="receptLista" class="item-list">
+                    </ul>
+                </div>
+            </section>
+
+            <section id="lista-tab" class="tab-content">
+                <div class="card">
+                    <h3>Kiválasztott Menü</h3>
+                    <p class="helper-text">Add hozzá a recepteket a menühöz a ➕ gombbal!</p>
+                    <ul id="kivalasztottReceptek" class="item-list">
+                    </ul>
+                    <div class="button-group">
+                        <button onclick="bevasarloListaGeneralasa()" class="btn-primary">Bevásárlólista
+                            Összesítése</button>
+                        <button class="delete-btn" onclick="menuUrítése()" style="background:#95a5a6;">Menü
+                            ürítése</button>
+                    </div>
+                </div>
+
+                <div id="osszesitettListaCard" class="card" style="display:none;">
+                    <h3>🛒 Összesített Bevásárlólista</h3>
+                    <ul id="bevasarloLista" class="item-list">
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

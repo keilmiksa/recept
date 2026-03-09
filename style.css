@@ -1,0 +1,230 @@
+:root {
+        --primary: #2ecc71; /* Élénk zöld a pozitív dolgoknak */
+        --secondary: #3498db; /* Kék a recepteknek */
+        --danger: #e74c3c; /* Piros a törlésnek/hiánynak */
+        --bg: #121212; /* Mélyfekete háttér */
+        --card-bg: #1e1e1e; /* Sötétszürke kártyák */
+        --input-bg: #2d2d2d; /* Még világosabb szürke az inputoknak */
+        --text-main: #e0e0e0; /* Világosszürke szöveg */
+        --text-dim: #b0b0b0; /* Tompított szöveg */
+        --border: #333333; /* Finom elválasztó vonalak */
+}
+
+body {
+        font-family:
+                "Segoe UI",
+                system-ui,
+                -apple-system,
+                sans-serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        margin: 0;
+        padding: 10px;
+        line-height: 1.5;
+}
+
+.container {
+        max-width: 800px;
+        margin: 0 auto;
+}
+
+header {
+        text-align: center;
+        padding: 20px 0;
+}
+
+h1 {
+        font-size: 1.8rem;
+        margin: 0;
+        color: var(--primary);
+}
+header p {
+        color: var(--text-dim);
+        margin: 5px 0;
+}
+
+/* --- TABS NAV (Sötét módhoz igazítva) --- */
+.tabs {
+        display: flex;
+        gap: 8px;
+        background: #1a1a1a;
+        padding: 6px;
+        border-radius: 14px;
+        margin-bottom: 25px;
+        position: sticky;
+        top: 10px;
+        z-index: 100;
+        border: 1px solid var(--border);
+}
+
+.tab-link {
+        flex: 1;
+        border: none;
+        padding: 14px 5px;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+}
+
+.tab-link.active {
+        background: var(--primary);
+        color: #000; /* Az aktív gombon fekete legyen a szöveg a kontraszt miatt */
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+/* --- KÁRTYÁK --- */
+.card {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+h3 {
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+        color: var(--text-main);
+        font-weight: 500;
+}
+
+/* --- INPUTOK --- */
+.input-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 10px;
+        margin-bottom: 15px;
+}
+
+input,
+select,
+button {
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 16px;
+        background-color: var(--input-bg);
+        color: white;
+        outline: none;
+}
+
+input:focus {
+        border-color: var(--primary);
+}
+
+/* Legördülő menü nyila és stílusa */
+select {
+        appearance: none;
+        cursor: pointer;
+}
+
+.full-width-input {
+        width: 100%;
+        box-sizing: border-box;
+}
+
+button {
+        background: var(--primary);
+        color: #000;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+}
+
+button:hover {
+        opacity: 0.9;
+}
+
+.btn-alt {
+        background: var(--secondary);
+        color: white;
+        width: 100%;
+        margin-top: 15px;
+}
+
+/* --- LISTÁK --- */
+.item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+}
+
+.item-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 8px;
+        border-bottom: 1px solid var(--border);
+}
+
+.item-name {
+        color: var(--text-main);
+        text-transform: capitalize;
+}
+
+.delete-btn {
+        background: var(--danger);
+        color: white;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+}
+
+/* --- ÁLLAPOTOK --- */
+.missing {
+        color: var(--danger);
+        font-weight: bold;
+}
+.ok {
+        color: var(--primary);
+}
+
+.preview-list {
+        margin: 20px 0;
+        border: 2px dashed var(--border);
+        background: rgba(255, 255, 255, 0.02);
+}
+
+.helper-text {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        margin-top: 10px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+        .input-row {
+                grid-template-columns: 1fr 1fr;
+        }
+        .input-row input[type="text"] {
+                grid-column: span 2;
+        }
+        .tab-link {
+                font-size: 0.8rem;
+        }
+}
+
+.tab-content {
+        display: none;
+}
+.tab-content.active {
+        display: block;
+        animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+        from {
+                opacity: 0;
+                transform: translateY(10px);
+        }
+        to {
+                opacity: 1;
+                transform: translateY(0);
+        }
+}
