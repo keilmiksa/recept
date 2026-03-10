@@ -1,15 +1,11 @@
-/**
- * SZAKÁCSSEGÉD - DINAMIKUS KATEGÓRIÁK KAMRÁHOZ ÉS RECEPTEKHEZ
- */
-
 // --- GLOBÁLIS ADATOK ---
 let kamra = {};
 let sajatReceptek = [];
-let osszesRecept = [];
 let kivalasztottMenu = [];
-let ideiglenesHozzavalok = []; // Az éppen készülő recept hozzávalói
+let ideiglenesHozzavalok = [];
 
-// --- KÖZPONTI ADATBÁZIS ---
+const valtoszamok = { g: 1, kg: 1000, ml: 1, dl: 100, l: 1000, db: 1 };
+
 const kategoriaAdatok = {
     'Zöldség/Gyümölcs': [
         'Burgonya',
@@ -40,149 +36,258 @@ const kategoriaAdatok = {
         'Tojás',
         'Virsli',
     ],
-    Pékáru: [
-        'Kenyér',
-        'Kifli',
-        'Zsemle',
-        'Liszt (Finom)',
-        'Liszt (Rétes)',
-        'Zsemlemorzsa',
-    ],
-    'Fűszer/Szárazáru': [
-        'Só',
-        'Bors',
-        'Pirospaprika',
+    'Alapvető/Száraz': [
+        'Liszt',
         'Cukor',
-        'Olaj',
+        'Só',
         'Rizs',
-        'Száraztészta',
-        'Bab',
-        'Lencse',
+        'Tészta',
+        'Olaj',
+        'Zsemlemorzsa',
+        'Pirospaprika',
     ],
-    Egyéb: ['Kávé', 'Tea', 'Citromlé', 'Mustár', 'Ketchup', 'Majonéz'],
 };
-
-const valtoszamok = { g: 1, kg: 1000, ml: 1, dl: 100, l: 1000, db: 1 };
 
 // --- INICIALIZÁLÁS ---
 window.onload = async () => {
-    // Kategória listák feltöltése mindkét helyen
-    toltsdFelKategoriakkal('k-kategoria'); // Kamra fül
-    toltsdFelKategoriakkal('r-kategoria'); // Recept fül
-
     await betoltesFirebasebol();
-    await alapReceptekBetoltese();
+    toltsdFelKategoriakkal('k-kategoria');
+    toltsdFelKategoriakkal('r-kategoria');
     frissitMindenListat();
 };
 
 function toltsdFelKategoriakkal(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
-    select.innerHTML = '<option value="">Válassz kategóriát...</option>';
-    Object.keys(kategoriaAdatok).forEach((kat) => {
+    select.innerHTML = '<option value="">Kategória...</option>';
+    for (let kat in kategoriaAdatok) {
         let opt = document.createElement('option');
-        opt.value = opt.innerText = kat;
+        opt.value = kat;
+        opt.innerHTML = kat;
+        select.appendChild(opt);
+    }
+}
+
+function frissitAlapanyagOpciok() {
+    const kat = document.getElementById('k-kategoria').value;
+    const select = document.getElementById('k-nev-select');
+    select.innerHTML = '<option value="">Alapanyag...</option>';
+    if (!kat) {
+        select.disabled = true;
+        return;
+    }
+    select.disabled = false;
+    kategoriaAdatok[kat].forEach((a) => {
+        let opt = document.createElement('option');
+        opt.value = a;
+        opt.innerHTML = a;
         select.appendChild(opt);
     });
 }
 
-// --- DINAMIKUS VÁLASZTÓK LOGIKÁJA ---
-
-// Kamra fülhöz
-function frissitAlapanyagOpciok() {
-    frissitAlszint('k-kategoria', 'k-nev-select');
-}
-
-// Recept fülhöz
 function frissitReceptAlapanyagOpciok() {
-    frissitAlszint('r-kategoria', 'r-nev-select');
-}
-
-// Általános függvény az al-lista frissítésére
-function frissitAlszint(katId, termekId) {
-    const kategoria = document.getElementById(katId).value;
-    const termekValaszto = document.getElementById(termekId);
-
-    termekValaszto.innerHTML = '<option value="">Válassz terméket...</option>';
-    termekValaszto.disabled = !kategoria;
-
-    if (kategoria && kategoriaAdatok[kategoria]) {
-        kategoriaAdatok[kategoria].forEach((t) => {
-            let opt = document.createElement('option');
-            opt.value = opt.innerText = t;
-            termekValaszto.appendChild(opt);
-        });
-    }
-}
-
-// --- RECEPT HOZZÁADÁSA ---
-
-function hozzaadIdeiglenesHozzavalo() {
-    const nev = document.getElementById('r-nev-select').value;
-    const menny = parseFloat(document.getElementById('r-menny').value);
-    const egyseg = document.getElementById('r-egyseg').value;
-
-    if (!nev || isNaN(menny)) {
-        alert('Válassz alapanyagot és mennyiséget!');
+    const kat = document.getElementById('r-kategoria').value;
+    const select = document.getElementById('r-nev-select');
+    select.innerHTML = '<option value="">Alapanyag...</option>';
+    if (!kat) {
+        select.disabled = true;
         return;
     }
-
-    ideiglenesHozzavalok.push({ nev, mennyiseg: menny, egyseg });
-
-    // Lista megjelenítése a felületen (opcionális segédfüggvény)
-    megjelenitIdeiglenesLista();
-
-    // Mezők ürítése
-    document.getElementById('r-menny').value = '';
+    select.disabled = false;
+    kategoriaAdatok[kat].forEach((a) => {
+        let opt = document.createElement('option');
+        opt.value = a;
+        opt.innerHTML = a;
+        select.appendChild(opt);
+    });
 }
 
-async function receptMentese() {
-    const nev = document.getElementById('recept-nev').value.trim();
-    if (!nev || ideiglenesHozzavalok.length === 0) {
-        alert('Adj nevet a receptnek és legalább egy hozzávalót!');
-        return;
-    }
-
-    const ujRecept = { nev, hozzavalok: [...ideiglenesHozzavalok] };
-    sajatReceptek.push(ujRecept);
-    osszesRecept.push(ujRecept);
-
-    await mentesFirebasebe();
-    ideiglenesHozzavalok = [];
-    document.getElementById('recept-nev').value = '';
-    frissitReceptLista();
-    alert('Recept elmentve!');
-}
-
-// --- EGYÉB FUNKCIÓK (KAMRA, MENÜ, FIREBASE) ---
-// (Itt maradnak a korábbi válaszban megírt kamrakezelő és listaépítő függvények...)
-
+// --- KAMRA KEZELÉS ---
 async function hozzaadKamra() {
     const nev = document.getElementById('k-nev-select').value;
     const menny = parseFloat(document.getElementById('k-menny').value);
     const egyseg = document.getElementById('k-egyseg').value;
 
-    if (!nev || isNaN(menny)) return alert('Hiányzó adatok!');
+    if (!nev || isNaN(menny)) return;
 
-    const kulcs = nev.toLowerCase();
-    if (kamra[kulcs]) kamra[kulcs].mennyiseg += menny;
-    else kamra[kulcs] = { nev, mennyiseg: menny, egyseg };
-
+    if (kamra[nev] && kamra[nev].egyseg === egyseg) {
+        kamra[nev].mennyiseg += menny;
+    } else {
+        kamra[nev] = { nev, mennyiseg: menny, egyseg };
+    }
     await mentesFirebasebe();
     frissitKamraLista();
-    document.getElementById('k-menny').value = '';
+}
+
+async function torolKamra(nev) {
+    if (confirm(`Törlöd a(z) ${nev} alapanyagot a kamrából?`)) {
+        delete kamra[nev];
+        await mentesFirebasebe();
+        frissitKamraLista();
+    }
+}
+
+// --- RECEPT KEZELÉS ---
+function hozzaadIdeiglenesHozzavalo() {
+    const nev = document.getElementById('r-nev-select').value;
+    const menny = parseFloat(document.getElementById('r-menny').value);
+    const egyseg = document.getElementById('r-egyseg').value;
+
+    if (!nev || isNaN(menny)) return;
+    ideiglenesHozzavalok.push({ nev, mennyiseg: menny, egyseg });
+    megjelenitIdeiglenesLista();
+}
+
+function torolIdeiglenesHozzavalo(index) {
+    ideiglenesHozzavalok.splice(index, 1);
+    megjelenitIdeiglenesLista();
+}
+
+function megjelenitIdeiglenesLista() {
+    const lista = document.getElementById('ideiglenesLista');
+    const kontener = document.getElementById('ideiglenesListaHelye');
+    lista.innerHTML = '';
+    ideiglenesHozzavalok.forEach((h, i) => {
+        lista.innerHTML += `<li>${h.nev}: ${h.mennyiseg} ${h.egyseg} <button onclick="torolIdeiglenesHozzavalo(${i})">✖</button></li>`;
+    });
+    kontener.style.display = ideiglenesHozzavalok.length > 0 ? 'block' : 'none';
+}
+
+async function receptMentese() {
+    const nev = document.getElementById('recept-nev').value;
+    if (!nev || ideiglenesHozzavalok.length === 0) {
+        alert('Adj meg nevet és legalább egy hozzávalót!');
+        return;
+    }
+
+    const ujRecept = { nev, hozzavalok: [...ideiglenesHozzavalok] };
+    sajatReceptek.push(ujRecept);
+
+    await mentesFirebasebe();
+    ideiglenesHozzavalok = [];
+    document.getElementById('recept-nev').value = '';
+    megjelenitIdeiglenesLista();
+    frissitReceptLista();
+}
+
+async function torolReceptet(index) {
+    if (
+        confirm(
+            `Biztosan törölni akarod a "${sajatReceptek[index].nev}" receptet?`
+        )
+    ) {
+        sajatReceptek.splice(index, 1);
+        await mentesFirebasebe();
+        frissitReceptLista();
+    }
+}
+
+// --- MENÜ ÉS BEVÁSÁRLÓLISTA ---
+function hozzaadMenuhoz(index) {
+    kivalasztottMenu.push(sajatReceptek[index]);
+    frissitMenuDisplay();
+}
+
+function frissitMenuDisplay() {
+    const lista = document.getElementById('kivalasztottReceptek');
+    lista.innerHTML = '';
+    kivalasztottMenu.forEach((r, i) => {
+        lista.innerHTML += `<li>${r.nev} <button onclick="torolMenubol(${i})">❌</button></li>`;
+    });
+}
+
+function torolMenubol(i) {
+    kivalasztottMenu.splice(i, 1);
+    frissitMenuDisplay();
+}
+
+function menuUritese() {
+    kivalasztottMenu = [];
+    frissitMenuDisplay();
+    document.getElementById('osszesitettListaCard').style.display = 'none';
+}
+
+function bevasarloListaGeneralas() {
+    if (kivalasztottMenu.length === 0) {
+        alert('Válassz ki legalább egy receptet a menühöz!');
+        return;
+    }
+    const listaHelye = document.getElementById('bevasarloLista');
+    listaHelye.innerHTML = '';
+    document.getElementById('osszesitettListaCard').style.display = 'block';
+
+    let szukseg = {};
+
+    kivalasztottMenu.forEach((r) => {
+        r.hozzavalok.forEach((h) => {
+            let alapMenny = h.mennyiseg * valtoszamok[h.egyseg];
+            if (!szukseg[h.nev])
+                szukseg[h.nev] = { menny: 0, egyseg: h.egyseg };
+            szukseg[h.nev].menny += alapMenny;
+        });
+    });
+
+    for (let nev in szukseg) {
+        let vanAlap = kamra[nev]
+            ? kamra[nev].mennyiseg * valtoszamok[kamra[nev].egyseg]
+            : 0;
+        let kellAlap = szukseg[nev].menny;
+        let li = document.createElement('li');
+
+        if (vanAlap < kellAlap) {
+            let hiany = (kellAlap - vanAlap) / valtoszamok[szukseg[nev].egyseg];
+            li.innerHTML = `<strong>${nev}</strong> - <span style="color:#e74c3c;">Kell: ${hiany.toFixed(
+                1
+            )} ${szukseg[nev].egyseg}</span>`;
+        } else {
+            li.innerHTML = `<strong>${nev}</strong> - <span style="color:#2ecc71;">Van elég ✅</span>`;
+        }
+        listaHelye.appendChild(li);
+    }
+}
+
+// --- TAB KEZELÉS ---
+function openTab(evt, tabName) {
+    let tabcontent = document.getElementsByClassName('tab-content');
+    for (let i = 0; i < tabcontent.length; i++)
+        tabcontent[i].style.display = 'none';
+    let tablinks = document.getElementsByClassName('tab-link');
+    for (let i = 0; i < tablinks.length; i++)
+        tablinks[i].classList.remove('active');
+    document.getElementById(tabName).style.display = 'block';
+    evt.currentTarget.classList.add('active');
+}
+
+// --- LISTÁK FRISSÍTÉSE ---
+function frissitMindenListat() {
+    frissitKamraLista();
+    frissitReceptLista();
 }
 
 function frissitKamraLista() {
     const lista = document.getElementById('kamraLista');
-    if (!lista) return;
     lista.innerHTML = '';
     for (let k in kamra) {
-        const t = kamra[k];
-        lista.innerHTML += `<li><span class="item-name">${t.nev}</span> <span>${t.mennyiseg} ${t.egyseg}</span> <button onclick="torolKamra('${k}')">Törlés</button></li>`;
+        lista.innerHTML += `<li>${kamra[k].nev}: ${kamra[k].mennyiseg} ${kamra[k].egyseg} <button onclick="torolKamra('${k}')">Törlés</button></li>`;
     }
 }
 
+function frissitReceptLista() {
+    const lista = document.getElementById('receptLista');
+    lista.innerHTML = '';
+    sajatReceptek.forEach((r, i) => {
+        lista.innerHTML += `
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <h4>${r.nev}</h4>
+                <div>
+                    <button onclick="hozzaadMenuhoz(${i})" style="background:#3498db; margin-right:5px;">Választ</button>
+                    <button onclick="torolReceptet(${i})" style="background:#e74c3c;">Törlés</button>
+                </div>
+            </div>`;
+    });
+}
+
+// --- FIREBASE SZINKRON ---
 async function mentesFirebasebe() {
     if (typeof db !== 'undefined') {
         await db
@@ -200,88 +305,4 @@ async function betoltesFirebasebol() {
             sajatReceptek = doc.data().sajatReceptek || [];
         }
     }
-}
-
-async function alapReceptekBetoltese() {
-    // Itt tölthetsz be külső JSON-t, de a sajatReceptek már benne lesz
-    osszesRecept = [...sajatReceptek];
-}
-
-function frissitMindenListat() {
-    frissitKamraLista();
-    frissitReceptLista();
-}
-
-function frissitReceptLista() {
-    const lista = document.getElementById('receptLista');
-    if (!lista) return;
-    lista.innerHTML = '';
-    osszesRecept.forEach((r, i) => {
-        lista.innerHTML += `<div class="recept-card"><h4>${r.nev}</h4><button onclick="hozzaadMenuhoz(${i})">Választ</button></div>`;
-    });
-}
-
-// --- HIÁNYZÓ MENÜ KEZELÉS ---
-function hozzaadMenuhoz(index) {
-    kivalasztottMenu.push(osszesRecept[index]);
-    frissitMenuDisplay();
-}
-
-function frissitMenuDisplay() {
-    const lista = document.getElementById('kivalasztottReceptek');
-    if (!lista) return;
-    lista.innerHTML = '';
-    kivalasztottMenu.forEach((r, i) => {
-        const li = document.createElement('li');
-        li.innerHTML = `${r.nev} <button onclick="torolMenubol(${i})">❌</button>`;
-        lista.appendChild(li);
-    });
-}
-
-function torolMenubol(i) {
-    kivalasztottMenu.splice(i, 1);
-    frissitMenuDisplay();
-}
-
-function menuUritese() {
-    kivalasztottMenu = [];
-    frissitMenuDisplay();
-    document.getElementById('osszesitettListaCard').style.display = 'none';
-}
-
-// --- IDEIGLENES LISTA MEGJELENÍTÉSE RECEPTÍRÁSKOR ---
-function megjelenitIdeiglenesLista() {
-    const lista = document.getElementById('ideiglenesLista');
-    const kontener = document.getElementById('ideiglenesListaHelye');
-    if (!lista || !kontener) return;
-
-    lista.innerHTML = '';
-    ideiglenesHozzavalok.forEach((h, i) => {
-        lista.innerHTML += `<li>${h.nev}: ${h.mennyiseg} ${h.egyseg}</li>`;
-    });
-
-    // Csak akkor mutatjuk a Mentés gombot, ha van hozzávaló
-    kontener.style.display = ideiglenesHozzavalok.length > 0 ? 'block' : 'none';
-}
-
-function openTab(evt, tabName) {
-    let i, tabcontent, tablinks;
-
-    // Összes tartalom elrejtése
-    tabcontent = document.getElementsByClassName('tab-content');
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = 'none';
-        tabcontent[i].classList.remove('active');
-    }
-
-    // Összes gomb deaktiválása
-    tablinks = document.getElementsByClassName('tab-link');
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove('active');
-    }
-
-    // Csak a kiválasztott fül megjelenítése
-    document.getElementById(tabName).style.display = 'block';
-    document.getElementById(tabName).classList.add('active');
-    evt.currentTarget.classList.add('active');
 }

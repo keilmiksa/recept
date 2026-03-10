@@ -52,7 +52,7 @@
                 <div class="card">
                     <h3>Új recept hozzáadása</h3>
                     <input type="text" id="recept-nev" placeholder="Recept neve"
-                        style="width: 100%; margin-bottom: 10px; padding: 10px; background: #2d2d2d; color: white; border: 1px solid #444;">
+                        style="width: 100%; margin-bottom: 10px; padding: 10px; background: #2d2d2d; color: white; border: 1px solid #444; border-radius: 4px;">
                     <div class="input-row">
                         <select id="r-kategoria" onchange="frissitReceptAlapanyagOpciok()">
                             <option value="">Kategória...</option>
@@ -78,17 +78,18 @@
                             style="width: 100%; background: #2ecc71; margin-top: 10px;">Recept mentése</button>
                     </div>
                 </div>
+                <h3>Mentett receptjeim</h3>
                 <div id="receptLista" class="recept-grid"></div>
             </section>
 
             <section id="lista-tab" class="tab-content">
                 <div class="card">
-                    <h3>Kiválasztott menü</h3>
+                    <h3>Kiválasztott menü (Heti terv)</h3>
                     <ul id="kivalasztottReceptek" class="item-list"></ul>
                     <button onclick="bevasarloListaGeneralas()" style="width: 100%; margin-top: 10px;">Bevásárlólista
                         generálása</button>
-                    <button onclick="menuUritese()" class="delete-btn" style="width: 100%; margin-top: 5px;">Menü
-                        ürítése</button>
+                    <button onclick="menuUritese()" class="delete-btn"
+                        style="width: 100%; margin-top: 5px; background: #95a5a6;">Menü ürítése</button>
                 </div>
                 <div id="osszesitettListaCard" class="card" style="display:none;">
                     <h3>🛒 Összesített lista</h3>
@@ -102,7 +103,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
     <script>
-        // Ide a SAJÁT configodat másold vissza!
         const firebaseConfig = {
             apiKey: "AIzaSyCoZrqFt-6L_WEXZSJATHcPCv3kghvSjZM",
             authDomain: "receptek-3e57b.firebaseapp.com",
