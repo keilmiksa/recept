@@ -9,11 +9,9 @@
 </head>
 
 <body>
-
     <div class="container">
         <header>
             <h1>🍳 Szakácssegéd</h1>
-            <p>Okos receptkezelő és bevásárlólista</p>
             <nav class="tabs">
                 <button class="tab-link active" onclick="openTab(event, 'kamra-tab')">🏠 Kamra</button>
                 <button class="tab-link" onclick="openTab(event, 'recept-tab')">📖 Receptek</button>
@@ -26,7 +24,12 @@
                 <div class="card">
                     <h3>Készlet frissítése</h3>
                     <div class="input-row">
-                        <input type="text" id="k-nev" placeholder="Alapanyag neve">
+                        <select id="k-kategoria" onchange="frissitAlapanyagOpciok()">
+                            <option value="">Kategória...</option>
+                        </select>
+                        <select id="k-nev-select" disabled>
+                            <option value="">Alapanyag...</option>
+                        </select>
                         <input type="number" id="k-menny" placeholder="Menny.">
                         <select id="k-egyseg">
                             <option value="g">g</option>
@@ -36,27 +39,29 @@
                             <option value="l">l</option>
                             <option value="db">db</option>
                         </select>
-                        <button onclick="hozzaadKamra()">Hozzáad</button>
+                        <button onclick="hozzaadKamra()">Hozzáadás</button>
                     </div>
                 </div>
-
                 <div class="card">
-                    <h3>Saját Készletem</h3>
-                    <ul id="kamraLista" class="item-list">
-                    </ul>
+                    <h3>Saját készletem</h3>
+                    <ul id="kamraLista" class="item-list"></ul>
                 </div>
             </section>
 
             <section id="recept-tab" class="tab-content">
                 <div class="card">
-                    <h3>Új Recept Létrehozása</h3>
-                    <input type="text" id="receptNev" placeholder="Recept neve (pl. Palacsinta)"
-                        class="full-width-input">
-
-                    <div class="input-row" style="margin-top: 15px;">
-                        <input type="text" id="r-h-nev" placeholder="Hozzávaló">
-                        <input type="number" id="r-h-menny" placeholder="Menny.">
-                        <select id="r-h-egyseg">
+                    <h3>Új recept hozzáadása</h3>
+                    <input type="text" id="recept-nev" placeholder="Recept neve"
+                        style="width: 100%; margin-bottom: 10px; padding: 10px; background: #2d2d2d; color: white; border: 1px solid #444;">
+                    <div class="input-row">
+                        <select id="r-kategoria" onchange="frissitReceptAlapanyagOpciok()">
+                            <option value="">Kategória...</option>
+                        </select>
+                        <select id="r-nev-select" disabled>
+                            <option value="">Alapanyag...</option>
+                        </select>
+                        <input type="number" id="r-menny" placeholder="Menny.">
+                        <select id="r-egyseg">
                             <option value="g">g</option>
                             <option value="kg">kg</option>
                             <option value="ml">ml</option>
@@ -64,67 +69,51 @@
                             <option value="l">l</option>
                             <option value="db">db</option>
                         </select>
-                        <button onclick="hozzaadIdeiglenesHozzavalo()">+</button>
+                        <button onclick="hozzaadIdeiglenesHozzavalo()">➕</button>
                     </div>
-
-                    <ul id="ideiglenesLista" class="item-list preview-list">
-                    </ul>
-
-                    <button class="btn-alt" onclick="mentesRecept()">Recept Végleges Mentése</button>
+                    <div id="ideiglenesListaHelye" style="display:none; margin-top: 15px;">
+                        <h4>Hozzávalók listája:</h4>
+                        <ul id="ideiglenesLista" class="item-list"></ul>
+                        <button onclick="receptMentese()"
+                            style="width: 100%; background: #2ecc71; margin-top: 10px;">Recept mentése</button>
+                    </div>
                 </div>
-
-                <div class="card">
-                    <h3>Mentett Ételek</h3>
-                    <ul id="receptLista" class="item-list">
-                    </ul>
-                </div>
+                <div id="receptLista" class="recept-grid"></div>
             </section>
 
             <section id="lista-tab" class="tab-content">
                 <div class="card">
-                    <h3>Kiválasztott Menü</h3>
-                    <p class="helper-text">Add hozzá a recepteket a menühöz a ➕ gombbal!</p>
-                    <ul id="kivalasztottReceptek" class="item-list">
-                    </ul>
-                    <div class="button-group">
-                        <button onclick="bevasarloListaGeneralasa()" class="btn-primary">Bevásárlólista
-                            Összesítése</button>
-                        <button class="delete-btn" onclick="menuUrítése()" style="background:#95a5a6;">Menü
-                            ürítése</button>
-                    </div>
+                    <h3>Kiválasztott menü</h3>
+                    <ul id="kivalasztottReceptek" class="item-list"></ul>
+                    <button onclick="bevasarloListaGeneralas()" style="width: 100%; margin-top: 10px;">Bevásárlólista
+                        generálása</button>
+                    <button onclick="menuUritese()" class="delete-btn" style="width: 100%; margin-top: 5px;">Menü
+                        ürítése</button>
                 </div>
-
                 <div id="osszesitettListaCard" class="card" style="display:none;">
-                    <h3>🛒 Összesített Bevásárlólista</h3>
-                    <ul id="bevasarloLista" class="item-list">
-                    </ul>
+                    <h3>🛒 Összesített lista</h3>
+                    <ul id="bevasarloLista" class="item-list"></ul>
                 </div>
             </section>
         </main>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
+    <script src="script.js"></script>
     <script>
-        // 2. A te saját konfigurációd
+        // Ide a SAJÁT configodat másold vissza!
         const firebaseConfig = {
             apiKey: "AIzaSyCoZrqFt-6L_WEXZSJATHcPCv3kghvSjZM",
             authDomain: "receptek-3e57b.firebaseapp.com",
             projectId: "receptek-3e57b",
             storageBucket: "receptek-3e57b.firebasestorage.app",
             messagingSenderId: "68235647947",
-            appId: "1:68235647947:web:869766986c4728f3348633"
+            appId: "1:68235647947:web:86976698642735d1056526"
         };
-
-        // 3. INICIALIZÁLÁS (Ez a rész hiányzott vagy hibás volt!)
         firebase.initializeApp(firebaseConfig);
-
-        // Ez a sor hozza létre a kapcsolatot, amit a script.js használ:
-        var db = firebase.firestore(); 
+        const db = firebase.firestore();
     </script>
-
-    <script src="script.js"></script>
-
 </body>
 
 </html>
